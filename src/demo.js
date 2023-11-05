@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import g from './global'
+import "./style.css"
 
 export default class demo extends Component {
     constructor(props) {
@@ -11,9 +12,13 @@ export default class demo extends Component {
             idMarca: "0",
             marcas: [],
             autos: [],
-            idAuto: "0"
+            idAuto: "0",
+            idProveedor: "0",
+            proveedores: [],
+            productos: []
         }
     }
+
     listaYears = async () => {
         await axios.get(`${g.url_api}/auto/listaYears`)
             .then(res => {
@@ -24,28 +29,72 @@ export default class demo extends Component {
     marcaPorYear = async (year) => {
         await axios.get(`${g.url_api}/marca/PorYear?year=${year}`)
             .then(res => {
-                this.setState({ marcas: res.data })
+                this.setState({
+                    marcas: res.data,
+                    idMarca: "0",
+                    idAuto: "0",
+                    autos: [],
+                    productos: []
+                })
             })
     }
 
-    modeloPorMarcaYear = async (year) => {
-        await axios.get(`${g.url_api}/marca/PorYear?year=${year}`)
+    autoPorMarca = async (idMarca) => {
+        let yearMarca = {
+            idMarca: idMarca,
+            year: this.state.year
+        }
+        await axios.post(`${g.url_api}/Auto/modeloPorMarcaYear`, yearMarca)
             .then(res => {
-                this.setState({ marcas: res.data })
+                this.setState({
+                    autos: res.data,
+                    idAuto: "0",
+                    productos: []
+                })
             })
     }
+
+    /* proveedorPorAuto = async (idAuto) =>{
+        await axios.get(`${g.url_api}/Proveedor/PorAuto?idAuto=${idAuto}`)
+            .then(res => {
+                this.setState({ proveedores: res.data })
+            })
+    } */
 
     componentDidMount() {
         this.listaYears()
-        this.marcaPorYear(this.state.idMarca)
+        this.marcaPorYear(this.state.year)
     }
-    onChange = (e) => {
+
+    onChange = async (e) => {
         this.setState({
             [e.target.name]: e.target.value
         })
         if (e.target.name === "year") {
             this.marcaPorYear(e.target.value)
         }
+        if (e.target.name === "idMarca") {
+            this.autoPorMarca(e.target.value)
+        }
+        /* if(e.target.name === "idAuto") {
+            this.proveedorPorAuto(e.target.value)
+        } */
+    }
+
+    buscarProducto = async () => {
+        if (this.state.idMarca === "0" || this.state.year === "0") {
+            alert("Error:\nDebe seleccionar al menos el año y la marca del auto.")
+            return false
+        }
+        let fMarcaAuto = {
+            year: this.state.year,
+            idMarca: this.state.idMarca,
+            idAuto: this.state.idAuto
+        }
+        await axios.post(`${g.url_api}/Producto/FiltroMarcaAuto`, fMarcaAuto)
+            .then(res => {
+                this.setState({ productos: res.data })
+            })
     }
 
     render() {
@@ -60,7 +109,7 @@ export default class demo extends Component {
                         <option value="0">Selecciona una año</option>
                         {this.state.listaYears.map((year) => {
                             return (
-                                <option key={year}>{year}</option>
+                                <option value={year} key={year}>{year}</option>
                             )
                         })}
                     </select><br />
@@ -75,7 +124,7 @@ export default class demo extends Component {
                         <option value="0">Selecciona una marca</option>
                         {this.state.marcas.map((marca) => {
                             return (
-                                <option key={marca}>{marca}</option>
+                                <option value={marca.idMarca} key={marca.idMarca}>{marca.nombreMarca}</option>
                             )
                         })}
                     </select><br />
@@ -90,12 +139,76 @@ export default class demo extends Component {
                         <option value="0">Selecciona un auto</option>
                         {this.state.autos.map((auto) => {
                             return (
-                                <option key={auto}>{auto}</option>
+                                <option value={auto.idAuto} key={auto.idAuto}>{auto.nombreMarca}, modelo: {auto.modelo}, año: {auto.year}, motor: {auto.motor}</option>
                             )
                         })}
                     </select><br />
                     Modelo:
                 </p>
+
+                {/* <p>
+                    <select
+                        name="idProveedor"
+                        value={this.state.idProveedor}
+                        onChange={this.onChange}
+                    >
+                        <option value="0">Selecciona un proveedor</option>
+                        {this.state.proveedores.map((proveedor) => {
+                            return (
+                                <option value={proveedor.idProveedor} key={proveedor.idProveedor}>{proveedor.nombreProveedor}</option>
+                            )
+                        })}
+                    </select><br />
+                    Proveedor:
+                </p> */}
+
+                <p>
+                    <button
+                        type="button"
+                        onClick={this.buscarProducto}
+                    >
+                        Buscar productos
+                    </button>
+                </p>
+
+                <hr />
+                {this.state.productos.length > 0 &&
+                    <table>
+                        <thead>
+                            <th>AUTO</th>
+                            <th>PRODUCTO</th>
+                            <th>PRECIOS</th>
+                            <th>OBSERVACIONES</th>
+                            <th>EXISTENCIA</th>
+                        </thead>
+                        <tbody>
+                            {this.state.productos.map((producto) => {
+                                return (
+                                    <>
+                                        <tr key={producto.idProducto}>
+                                            <td>{producto.nombreMarca} <br />
+                                                modelo: {producto.modelo} <br />
+                                                año: {producto.year} <br />
+                                                motor: {producto.motor} </td>
+                                            <td>{producto.nombreProducto} <br />
+                                                # de parte: {producto.noParte} <br />
+                                                material: {producto.material} </td>
+                                            <td>precioNuevoInstalado: {producto.precioNuevoInstalado} <br />
+                                                precioNuevoSuelto: {producto.precioNuevoSuelto} <br />
+                                                precioReparadoInstalado: {producto.precioReparadoInstalado} <br />
+                                                precioReparadoSuelto: {producto.precioReparadoSuelto} </td>
+                                            <td>{producto.observaciones}</td>
+                                            <td>{producto.existencia}</td>
+                                        </tr>
+                                    </>
+                                )
+                            })}
+                        </tbody>
+                    </table>
+                }
+                {this.state.productos.length === 0 &&
+                    <h4>No se encontraron resultados</h4>
+                }
             </>
         )
     }
