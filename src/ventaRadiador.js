@@ -96,7 +96,7 @@ export default class VentaRadiador extends Component {
                 <fieldset>
                     <legend>Filtro de busqueda</legend>
                     <p>
-                    Año: <select
+                        Año: <select
                             name="year"
                             value={this.state.year}
                             onChange={this.onChange}
@@ -108,10 +108,10 @@ export default class VentaRadiador extends Component {
                                 )
                             })}
                         </select>
-                        
+
                     </p>
                     <p>
-                    Marca: <select
+                        Marca: <select
                             name="idMarca"
                             value={this.state.idMarca}
                             onChange={this.onChange}
@@ -125,7 +125,7 @@ export default class VentaRadiador extends Component {
                         </select>
                     </p>
                     <p>
-                    Modelo: <select
+                        Modelo: <select
                             name="idAuto"
                             value={this.state.idAuto}
                             onChange={this.onChange}
@@ -155,24 +155,27 @@ export default class VentaRadiador extends Component {
                     {this.state.productos.length > 0 &&
                         <table>
                             <thead>
-                                <th>AUTO</th>
-                                <th>PRODUCTO</th>
-                                <th>PRECIOS</th>
-                                <th>OBSERVACIONES</th>
-                                <th>EXISTENCIA</th>
-                                <th>IMAGEN</th>
-                                <th>COTIZACION</th>
+                                <tr>
+                                    <th>AUTO</th>
+                                    <th>PRODUCTO</th>
+                                    <th>PRECIOS</th>
+                                    <th>OBSERVACIONES</th>
+                                    <th>EXISTENCIA</th>
+                                    <th>IMAGEN</th>
+                                    <th>COTIZACION</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 {this.state.productos.map((producto) => {
                                     return (
-                                        <>
                                             <tr key={producto.idProducto}>
                                                 <td>{producto.nombreMarca} <br />
                                                     modelo: {producto.modelo} <br />
                                                     año: {producto.year} <br />
                                                     motor: {producto.motor} </td>
-                                                <td>{producto.nombreProducto} <br />
+                                                <td>
+                                                    proveedor: {producto.nombreProveedor} <br />
+                                                    {producto.nombreProducto} <br />
                                                     # de parte: {producto.noParte} <br />
                                                     material: {producto.material} </td>
                                                 <td>precioNuevoInstalado: {producto.precioNuevoInstalado} <br />
@@ -189,7 +192,6 @@ export default class VentaRadiador extends Component {
                                                     <button>Enviar email</button>
                                                 </td>
                                             </tr>
-                                        </>
                                     )
                                 })}
                             </tbody>

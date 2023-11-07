@@ -47,6 +47,9 @@ export default class demo extends Component {
                         CATALOGO
                     </li>
                     <ul>
+                    <li>
+                            Marca
+                        </li>
                         <li>
                             <a href="#" onClick={this.mostrarCatalogoAuto}>Auto</a>
                         </li>

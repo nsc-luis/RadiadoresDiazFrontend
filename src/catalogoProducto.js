@@ -10,7 +10,11 @@ export default class catalogoProducto extends Component {
             autos: [],
             proveedores: [],
             idProveedor: "0",
-            productos: []
+            productos: [],
+            mostrarFiltroMarca: false,
+            marcas: [],
+            idMarca: "0",
+            productosTemp: []
         }
     }
 
@@ -36,15 +40,44 @@ export default class catalogoProducto extends Component {
     listaProductos = async (idProveedor) => {
         await axios.get(`${g.url_api}/producto/PorProveedor?idProveedor=${idProveedor}`)
             .then(res => {
-                this.setState({ productos: res.data })
+                var marcasTemp = res.data
+                var hash = {}
+                /* marcasTemp = marcasTemp.filter(function(marca){
+                    var noRepetidos = !hash[marca.idMarca]
+                    hash[marca.idMarca] = true
+                    return noRepetidos
+                }) */
+                marcasTemp = marcasTemp.filter(o => hash[o.idMarca] ? false : hash[o.idMarca] = true)
+                this.setState({
+                    productos: res.data,
+                    marcas: marcasTemp
+                })
             })
     }
 
     onChangeProveedor = (e) => {
         this.setState({
-            idProveedor: e.target.value
+            idProveedor: e.target.value,
+            mostrarFiltroMarca: e.target.value !== "0" ? true : false,
+            idMarca: "0"
         })
         this.listaProductos(e.target.value)
+    }
+
+    onChangeMarca = (e) => {
+        this.setState({ idMarca: e.target.value })
+        if (e.target.value !== "0") {
+            var productosTemp = []
+            this.state.productos.forEach(prod => {
+                if (prod.idMarca === Number(e.target.value)) {
+                    productosTemp.push(prod)
+                }
+            })
+            this.setState({ productos: productosTemp })
+        }
+        else {
+            this.listaProductos(this.state.idProveedor)
+        }
     }
 
     guardarInfo = (e) => {
@@ -104,7 +137,7 @@ export default class catalogoProducto extends Component {
                                 <option>Seleccione un proveedor</option>
                                 {this.state.proveedores.map((proveedor) => {
                                     return (
-                                        <option key={proveedor.idproveedor} value={proveedor.idproveedor}> {proveedor.nombreProveedor}</option>
+                                        <option key={proveedor.idProveedor} value={proveedor.idProveedor}> {proveedor.nombreProveedor}</option>
                                     )
                                 })}
                             </select>
@@ -150,6 +183,24 @@ export default class catalogoProducto extends Component {
                             )
                         })}
                     </select>
+
+                    {this.state.mostrarFiltroMarca &&
+                        <>
+                            filtro de marca:
+                            <select
+                                name="idMarca"
+                                value={this.state.idMarca}
+                                onChange={this.onChangeMarca}
+                            >
+                                <option value="0">Selecciona una marca</option>
+                                {this.state.marcas.map((marca) => {
+                                    return (
+                                        <option key={marca.idMarca} value={marca.idMarca}> {marca.nombreMarca}</option>
+                                    )
+                                })}
+                            </select>
+                        </>
+                    }
 
                     {this.state.productos.length > 0 &&
                         <table>
@@ -204,7 +255,7 @@ export default class catalogoProducto extends Component {
                             No se encontraron resultados.
                         </>
                     }
-                </fieldset>
+                </fieldset >
             </>
         )
     }
