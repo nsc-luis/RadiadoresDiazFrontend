@@ -1,6 +1,6 @@
 {
   "name": "radiadores-diaz",
-  "homepage": "radiadoresDiaz/app",
+  "_homepage_": "radiadoresDiaz/app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

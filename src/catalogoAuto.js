@@ -10,7 +10,11 @@ export default class catalogoAuto extends Component {
             years: [],
             marcas: [],
             idMarca: "0",
-            autos: []
+            modelo: "",
+            year: "0",
+            motor: "0.0",
+            autos: [],
+            formularioAuto: false
         }
     }
 
@@ -52,56 +56,116 @@ export default class catalogoAuto extends Component {
         this.listaMarcas()
     }
 
-    guardarInfo = (e) => {
+    onChange = (e) => {
+        this.setState({
+            [e.target.name]: e.target.value
+        })
+    }
+
+    mostrarFormularioAuto = () => {
+        this.setState({
+            idMarca: "0",
+            year: "0",
+            modelo: "",
+            motor: "",
+            formularioAuto: !this.state.formularioAuto
+        })
+    }
+
+    guardarInfo = async (e) => {
         e.preventDefault()
-        alert("Aletra:\nAun no funcional.")
+        var altaAuto = {
+            idMarca: this.state.idMarca,
+            motor: this.state.motor,
+            modelo: this.state.modelo,
+            year: this.state.year
+        }
+        await axios.post(`${g.url_api}/Auto`, altaAuto)
+            .then(res => {
+                alert("Ok!\nAlta satisfactoria.")
+                console.log(res.data)
+            })
+        this.mostrarFormularioAuto()
     }
 
     render() {
         return (
             <>
-                CATALOGO DE AUTOS
+                CATALOGO DE AUTOS <br />
 
-                <fieldset>
-                    <legend>Formulario de alta/edicion de auto</legend>
-                    <form onSubmit={this.guardarInfo}>
-                        <p>
-                        Año: <select>
-                                <option value="0">Selecciona un año</option>
-                                {this.state.years.map((year) => {
-                                    return (
-                                        <option key={year} value={year}>{year}</option>
-                                    )
-                                })}
-                            </select>
-                        </p>
+                {this.state.formularioAuto === false &&
+                    <button onClick={this.mostrarFormularioAuto}>Formulario de alta</button>
+                }
 
-                        <p>
-                        Marca: <select>
-                                <option value="0">Selecciona una marca</option>
-                                {this.state.marcas.map((marca) => {
-                                    return (
-                                        <option key={marca.idMarca} value={marca.idMarca}>{marca.nombreMarca}</option>
-                                    )
-                                })}
-                            </select>
-                        </p>
+                {this.state.formularioAuto &&
+                    <fieldset>
+                        <legend>Formulario de alta/edicion de auto</legend>
+                        <form onSubmit={this.guardarInfo}>
+                            <p>
+                                Año:
+                                <select
+                                    name="year"
+                                    value={this.state.year}
+                                    onChange={this.onChange}
+                                >
+                                    <option value="0">Selecciona un año</option>
+                                    {this.state.years.map((year) => {
+                                        return (
+                                            <option key={year} value={year}>{year}</option>
+                                        )
+                                    })}
+                                </select>
+                            </p>
 
-                        <p>
-                        Modelo: <input type="text" />
-                        </p>
+                            <p>
+                                Marca:
+                                <select
+                                    name="idMarca"
+                                    value={this.state.idMarca}
+                                    onChange={this.onChange}
+                                >
+                                    <option value="0">Selecciona una marca</option>
+                                    {this.state.marcas.map((marca) => {
+                                        return (
+                                            <option key={marca.idMarca} value={marca.idMarca}>{marca.nombreMarca}</option>
+                                        )
+                                    })}
+                                </select>
+                            </p>
 
-                        <p>
-                            Motor: <input type="text" />
-                        </p>
+                            <p>
+                                Modelo:
+                                <input
+                                    type="text" name="modelo"
+                                    value={this.state.modelo}
+                                    onChange={this.onChange}
+                                />
+                            </p>
 
-                        <p>
-                            <button type="submit">
-                                Guardar
-                            </button>
-                        </p>
-                    </form>
-                </fieldset >
+                            <p>
+                                Motor:
+                                <input
+                                    type="text"
+                                    name="motor"
+                                    value={this.state.motor}
+                                    onChange={this.onChange}
+                                />
+                            </p>
+
+                            <p>
+                                <button type="submit">
+                                    Guardar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={this.mostrarFormularioAuto}
+                                >
+                                    Cerrar
+                                </button>
+                            </p>
+                        </form>
+                    </fieldset >
+                }
 
                 <fieldset>
                     <legend>Lista de autos</legend>

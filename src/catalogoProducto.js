@@ -7,20 +7,38 @@ export default class catalogoProducto extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            idMarca: "0",
+            marcas: [],
             autos: [],
             proveedores: [],
-            idProveedor: "0",
+            productosTemp: [],
             productos: [],
+            infoProducto: {},
             mostrarFiltroMarca: false,
-            marcas: [],
-            idMarca: "0",
-            productosTemp: []
+            formularioProducto: false
         }
     }
 
     componentDidMount() {
         this.listaAutos()
         this.listaProveedores()
+        this.setState({
+            infoProducto: {
+                ...this.state.infoProducto,
+                idProveedor: "0",
+                idTipoProducto: "1",
+                nombreProducto: "",
+                precioNuevoSuelto: "0.00",
+                precioNuevoInstalado: "0.00",
+                precioReparadoSuelto: "0.00",
+                precioReparadoInstalado: "0.00",
+                material: "",
+                noParte: "",
+                observaciones: "",
+                costoProveedor: "",
+                existencia: ""
+            }
+        })
     }
 
     listaAutos = async () => {
@@ -55,11 +73,23 @@ export default class catalogoProducto extends Component {
             })
     }
 
+    onChange = (e) => {
+        this.setState({
+            infoProducto: {
+                ...this.state.infoProducto,
+                [e.target.name]: e.target.value
+            }
+        })
+    }
+
     onChangeProveedor = (e) => {
         this.setState({
-            idProveedor: e.target.value,
+            infoProducto: {
+                ...this.state.infoProducto,
+                idProveedor: e.target.value,
+                idMarca: "0",
+            },
             mostrarFiltroMarca: e.target.value !== "0" ? true : false,
-            idMarca: "0"
         })
         this.listaProductos(e.target.value)
     }
@@ -80,94 +110,212 @@ export default class catalogoProducto extends Component {
         }
     }
 
-    guardarInfo = (e) => {
+    mostrarFormularioProducto = () => {
+        this.setState({ 
+            formularioProducto: !this.state.formularioProducto,
+            infoProducto: {
+                ...this.state.infoProducto,
+                idProveedor: "0",
+                idTipoProducto: "1",
+                nombreProducto: "",
+                precioNuevoSuelto: "0.00",
+                precioNuevoInstalado: "0.00",
+                precioReparadoSuelto: "0.00",
+                precioReparadoInstalado: "0.00",
+                noParte: "",
+                observaciones: "",
+                costoProveedor: "",
+                existencia: ""
+            }
+        })
+    }
+
+    guardarInfo = async (e) => {
         e.preventDefault()
-        alert("Alerta:\nAun no funcional.")
+        await axios.post(`${g.url_api}/producto`, this.state.infoProducto)
+            .then(res => {
+                alert("Ok!\nAlta de producto satisfactoria.")
+                console.log(res.data)
+            })
+        this.mostrarFormularioProducto()
     }
 
     render() {
         return (
             <>
-                CATALOGO DE PRODUCTOS
-                <fieldset>
-                    <legend>Formulario de alta/edicion de producto</legend>
-                    <form onSubmit={this.guardarInfo}>
-                        <p>
-                            tipoProducto:
-                            <select>
-                                <option>Selecciona el tipo de producto</option>
-                                <option>Radiador</option>
-                                <option>Tapa</option>
-                                <option>Ventilador</option>
-                                <option>Accesorio</option>
-                            </select>
-                        </p>
-                        <p>
-                            nombreProducto: <input type="text" />
-                        </p>
+                CATALOGO DE PRODUCTOS <br />
 
-                        <p>
-                            precioNuevoSuelto: <input type="number" />
-                        </p>
+                {this.state.formularioProducto === false &&
+                    <button
+                        type="buton"
+                        onClick={this.mostrarFormularioProducto}
+                    >
+                        Formulario producto
+                    </button>
+                }
 
-                        <p>
-                            precioNuevoInstalado: <input type="number" />
-                        </p>
+                {this.state.formularioProducto &&
+                    <fieldset>
+                        <legend>Formulario de alta/edicion de producto</legend>
+                        <form onSubmit={this.guardarInfo}>
+                            <p>
+                                tipoProducto:
+                                <select
+                                    name="idTipoProducto"
+                                    value={this.state.infoProducto.idTipoProducto}
+                                    onChange={this.onChange}
+                                >
+                                    <option value="0">Selecciona el tipo de producto</option>
+                                    <option value="1">Radiador</option>
+                                    <option value="2">Tapa</option>
+                                    <option value="3">Ventilador</option>
+                                    <option value="4">Accesorio</option>
+                                </select>
+                            </p>
+                            <p>
+                                nombreProducto:
+                                <input
+                                    type="text"
+                                    name="nombreProducto"
+                                    value={this.state.infoProducto.nombreProducto}
+                                    onChange={this.onChange}
+                                />
+                            </p>
 
-                        <p>
-                            precioReparadoSuelto: <input type="number" />
-                        </p>
+                            <p>
+                                precioNuevoSuelto:
+                                <input
+                                    type="number"
+                                    name="precioNuevoSuelto"
+                                    value={this.state.infoProducto.precioNuevoSuelto}
+                                    onChange={this.onChange}
+                                />
+                            </p>
 
-                        <p>
-                            precioReparadoInstalado: <input type="number" />
-                        </p>
+                            <p>
+                                precioNuevoInstalado:
+                                <input
+                                    type="number"
+                                    name="precioNuevoInstalado"
+                                    value={this.state.infoProducto.precioNuevoInstalado}
+                                    onChange={this.onChange}
+                                />
+                            </p>
 
-                        <p>
-                            noParte: <input type="text" />
-                        </p>
+                            <p>
+                                precioReparadoSuelto:
+                                <input
+                                    type="number"
+                                    name="precioReparadoSuelto"
+                                    value={this.state.infoProducto.precioReparadoSuelto}
+                                    onChange={this.onChange}
+                                />
+                            </p>
 
-                        <p>
-                            observaciones:<br />
-                            <textarea></textarea>
-                        </p>
+                            <p>
+                                precioReparadoInstalado:
+                                <input
+                                    type="number"
+                                    name="precioReparadoInstalado"
+                                    value={this.state.infoProducto.precioReparadoInstalado}
+                                    onChange={this.onChange}
+                                />
+                            </p>
 
-                        <p>
-                            Proveedor:
-                            <select>
-                                <option>Seleccione un proveedor</option>
-                                {this.state.proveedores.map((proveedor) => {
-                                    return (
-                                        <option key={proveedor.idProveedor} value={proveedor.idProveedor}> {proveedor.nombreProveedor}</option>
-                                    )
-                                })}
-                            </select>
-                        </p>
+                            <p>
+                                noParte: <input
+                                    type="text"
+                                    name="noParte"
+                                    value={this.state.infoProducto.noParte}
+                                    onChange={this.onChange}
+                                />
+                            </p>
 
-                        <p>
-                            costoProveedor: <input type="number" />
-                        </p>
+                            <p>
+                                material: <input
+                                    type="text"
+                                    name="material"
+                                    value={this.state.infoProducto.material}
+                                    onChange={this.onChange}
+                                />
+                            </p>
 
-                        <p>
-                            Aplica para el auto:
-                            <select>
-                                <option>Seleccione un auto</option>
-                                {this.state.autos.map((auto) => {
-                                    return (
-                                        <option key={auto.idAuto} value={auto.idAuto}> {auto.nombreMarca}, año: {auto.year} modelo: {auto.modelo}, motor: {auto.motor}</option>
-                                    )
-                                })}
-                            </select>
-                        </p>
+                            <p>
+                                observaciones:<br />
+                                <textarea
+                                    name="observaciones"
+                                    value={this.state.infoProducto.observaciones}
+                                    onChange={this.onChange}
+                                ></textarea>
+                            </p>
 
-                        <p>
-                            existencia: <input type="number" />
-                        </p>
+                            <p>
+                                Proveedor:
+                                <select
+                                    name="idProveedor"
+                                    value={this.state.infoProducto.idProveedor}
+                                    onChange={this.onChange}
+                                >
+                                    <option>Seleccione un proveedor</option>
+                                    {this.state.proveedores.map((proveedor) => {
+                                        return (
+                                            <option key={proveedor.idProveedor} value={proveedor.idProveedor}> {proveedor.nombreProveedor}</option>
+                                        )
+                                    })}
+                                </select>
+                            </p>
 
-                        <p>
-                            <button type="submit">Guardar</button>
-                        </p>
-                    </form>
-                </fieldset>
+                            <p>
+                                costoProveedor:
+                                <input type="number"
+                                    name="costoProveedor"
+                                    value={this.state.infoProducto.costoProveedor}
+                                    onChange={this.onChange}
+                                />
+                            </p>
+
+                            <p>
+                                Aplica para el auto:
+                                <select
+                                    name="idAuto"
+                                    value={this.state.infoProducto.idAuto}
+                                    onChange={this.onChange}
+                                >
+                                    <option>Seleccione un auto</option>
+                                    {this.state.autos.map((auto) => {
+                                        return (
+                                            <option key={auto.idAuto} value={auto.idAuto}> {auto.nombreMarca}, año: {auto.year} modelo: {auto.modelo}, motor: {auto.motor}</option>
+                                        )
+                                    })}
+                                </select>
+                            </p>
+
+                            <p>
+                                existencia:
+                                <input
+                                    type="number"
+                                    name="existencia"
+                                    value={this.state.infoProducto.existencia}
+                                    onChange={this.onChange}
+                                />
+                            </p>
+
+                            <p>
+                                <button
+                                    type="submit"
+                                >
+                                    Guardar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={this.mostrarFormularioProducto}
+                                >
+                                    Cerrar
+                                </button>
+                            </p>
+                        </form>
+                    </fieldset>
+                }
 
                 <fieldset>
                     <legend>Lista de productos</legend>
