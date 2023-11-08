@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import axios from 'axios'
 import g from './global'
 import "./style.css"
+import { FormFeedback, Input, FormGroup, Form, Button } from 'reactstrap'
 
 export default class catalogoProducto extends Component {
     constructor(props) {
@@ -15,7 +16,18 @@ export default class catalogoProducto extends Component {
             productos: [],
             infoProducto: {},
             mostrarFiltroMarca: false,
-            formularioProducto: false
+            formularioProducto: false,
+            idProveedorInvalid: false,
+            nombreProductoInvalid: false,
+            precioNuevoSueltoInvalid: false,
+            precioNuevoInstaladoInvalid: false,
+            precioReparadoSueltoInvalid: false,
+            precioReparadoInstaladoInvalid: false,
+            costoProveedorInvalid: false,
+            existenciaInvalid: false,
+            noParteInvalid: false,
+            idAutoInvalid: false,
+            materialInvalid: false
         }
     }
 
@@ -29,15 +41,15 @@ export default class catalogoProducto extends Component {
                 idAuto: "0",
                 idTipoProducto: "1",
                 nombreProducto: "",
-                precioNuevoSuelto: "0.00",
-                precioNuevoInstalado: "0.00",
-                precioReparadoSuelto: "0.00",
-                precioReparadoInstalado: "0.00",
-                material: "",
+                precioNuevoSuelto: "0",
+                precioNuevoInstalado: "0",
+                precioReparadoSuelto: "0",
+                precioReparadoInstalado: "0",
+                material: "0",
                 noParte: "",
                 observaciones: "",
-                costoProveedor: "",
-                existencia: ""
+                costoProveedor: "0",
+                existencia: "0"
             }
         })
     }
@@ -122,7 +134,7 @@ export default class catalogoProducto extends Component {
             this.setState({ productos: productosTemp })
         }
         else {
-            this.listaProductos(this.state.idProveedor)
+            this.listaProductos(this.state.infoProducto.idProveedor)
         }
     }
 
@@ -135,20 +147,47 @@ export default class catalogoProducto extends Component {
                 idAuto: "0",
                 idTipoProducto: "1",
                 nombreProducto: "",
-                precioNuevoSuelto: "0.00",
-                precioNuevoInstalado: "0.00",
-                precioReparadoSuelto: "0.00",
-                precioReparadoInstalado: "0.00",
+                precioNuevoSuelto: "0",
+                precioNuevoInstalado: "0",
+                precioReparadoSuelto: "0",
+                precioReparadoInstalado: "0",
                 noParte: "",
                 observaciones: "",
-                costoProveedor: "0.00",
-                existencia: ""
-            }
+                costoProveedor: "0",
+                existencia: "0",
+                material: "0"
+            },
+            idProveedorInvalid: false,
+            nombreProductoInvalid: false,
+            precioNuevoSueltoInvalid: false,
+            precioNuevoInstaladoInvalid: false,
+            precioReparadoSueltoInvalid: false,
+            precioReparadoInstaladoInvalid: false,
+            costoProveedorInvalid: false,
+            existenciaInvalid: false,
+            noParteInvalid: false,
+            idAutoInvalid: false,
+            materialInvalid: false
         })
     }
 
     guardarInfo = async (e) => {
         e.preventDefault()
+
+        this.setState({
+            idProveedorInvalid: this.state.infoProducto.idProveedor === "0" ? true : false,
+            nombreProductoInvalid: this.state.infoProducto.nombreProducto === "" ? true : false,
+            precioNuevoSueltoInvalid: !Number(this.state.infoProducto.precioNuevoSuelto) ? true : false,
+            precioNuevoInstaladoInvalid: !Number(this.state.infoProducto.precioNuevoInstalado) ? true : false,
+            precioReparadoSueltoInvalid: !Number(this.state.infoProducto.precioReparadoSuelto) ? true : false,
+            precioReparadoInstaladoInvalid: !Number(this.state.infoProducto.precioReparadoInstalado) ? true : false,
+            costoProveedorInvalid: !Number(this.state.infoProducto.costoProveedor) ? true : false,
+            existenciaInvalid: !Number(this.state.infoProducto.existencia) ? true : false,
+            noParteInvalid: this.state.infoProducto.noParte === "" ? true : false,
+            idAutoInvalid: this.state.infoProducto.idAuto === "0" ? true : false,
+            materialInvalid: this.state.infoProducto.material === "0" ? true : false,
+        })
+
         if (
             this.state.infoProducto.idProveedor === "0"
             || this.state.infoProducto.nombreProducto === ""
@@ -159,19 +198,22 @@ export default class catalogoProducto extends Component {
             || !Number(this.state.infoProducto.costoProveedor)
             || !Number(this.state.infoProducto.existencia)
             || this.state.infoProducto.noParte === ""
+            || this.state.infoProducto.idAuto === "0"
+            || this.state.infoProducto.material === "0"
         ) {
             alert("Error:\nLos campos marcados con * son requeridos.")
+            return false
         }
-            try {
-                await axios.post(`${g.url_api}/producto`, this.state.infoProducto)
-                    .then(res => {
-                        alert("Ok!\nAlta de producto satisfactoria.")
-                        console.log(res.data)
-                    })
-            }
-            catch (err) {
-                alert("Error:\n" + err)
-            }
+        try {
+            await axios.post(`${g.url_api}/producto`, this.state.infoProducto)
+                .then(res => {
+                    alert("Ok!\nAlta de producto satisfactoria.")
+                    console.log(res.data)
+                })
+        }
+        catch (err) {
+            alert("Error:\n" + err)
+        }
         this.mostrarFormularioProducto()
     }
 
@@ -193,103 +235,128 @@ export default class catalogoProducto extends Component {
                     <fieldset>
                         <legend>Formulario de alta/edicion de producto</legend>
                         <form onSubmit={this.guardarInfo}>
-                            <p>
+                            <FormGroup>
                                 * tipoProducto:
-                                <select
+                                <Input
+                                    type="select"
                                     name="idTipoProducto"
                                     value={this.state.infoProducto.idTipoProducto}
                                     onChange={this.onChange}
+                                    invalid={this.state.idTipoProductoInvalid}
                                 >
                                     <option value="0">Selecciona el tipo de producto</option>
                                     <option value="1">Radiador</option>
                                     <option value="2">Tapa</option>
                                     <option value="3">Ventilador</option>
                                     <option value="4">Accesorio</option>
-                                </select>
-                            </p>
-                            <p>
+                                </Input>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
+                            <FormGroup>
                                 * nombreProducto:
-                                <input
+                                <Input
                                     type="text"
                                     name="nombreProducto"
                                     value={this.state.infoProducto.nombreProducto}
                                     onChange={this.onChange}
+                                    invalid={this.state.nombreProductoInvalid}
                                 />
-                            </p>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 * precioNuevoSuelto:
-                                <input
+                                <Input
                                     type="number"
                                     name="precioNuevoSuelto"
                                     value={this.state.infoProducto.precioNuevoSuelto}
                                     onChange={this.onChange}
+                                    invalid={this.state.precioNuevoSueltoInvalid}
                                 />
-                            </p>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 * precioNuevoInstalado:
-                                <input
+                                <Input
                                     type="number"
                                     name="precioNuevoInstalado"
                                     value={this.state.infoProducto.precioNuevoInstalado}
                                     onChange={this.onChange}
+                                    invalid={this.state.precioNuevoInstaladoInvalid}
                                 />
-                            </p>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 * precioReparadoSuelto:
-                                <input
+                                <Input
                                     type="number"
                                     name="precioReparadoSuelto"
                                     value={this.state.infoProducto.precioReparadoSuelto}
                                     onChange={this.onChange}
+                                    invalid={this.state.precioReparadoSueltoInvalid}
                                 />
-                            </p>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 * precioReparadoInstalado:
-                                <input
+                                <Input
                                     type="number"
                                     name="precioReparadoInstalado"
                                     value={this.state.infoProducto.precioReparadoInstalado}
                                     onChange={this.onChange}
+                                    invalid={this.state.precioReparadoInstaladoInvalid}
                                 />
-                            </p>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
-                                * noParte: <input
+                            <FormGroup>
+                                * noParte:
+                                <Input
                                     type="text"
                                     name="noParte"
                                     value={this.state.infoProducto.noParte}
                                     onChange={this.onChange}
+                                    invalid={this.state.noParteInvalid}
                                 />
-                            </p>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
-                                * material: <input
-                                    type="text"
+                            <FormGroup>
+                                * material:
+                                <Input
+                                    type="select"
                                     name="material"
                                     value={this.state.infoProducto.material}
                                     onChange={this.onChange}
-                                />
-                            </p>
+                                    invalid={this.state.materialInvalid}
+                                >
+                                    <option value="0">Selecciona el material</option>
+                                    <option value="PLASTICO">Plastico</option>
+                                    <option value="METAL">Metal</option>
+                                </Input>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 * observaciones:<br />
                                 <textarea
                                     name="observaciones"
                                     value={this.state.infoProducto.observaciones}
                                     onChange={this.onChange}
                                 ></textarea>
-                            </p>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 * Proveedor:
-                                <select
+                                <Input
+                                    type="select"
                                     name="idProveedor"
                                     value={this.state.infoProducto.idProveedor}
                                     onChange={this.onChange}
+                                    invalid={this.state.idProveedorInvalid}
                                 >
                                     <option>Seleccione un proveedor</option>
                                     {this.state.proveedores.map((proveedor) => {
@@ -297,24 +364,28 @@ export default class catalogoProducto extends Component {
                                             <option key={proveedor.idProveedor} value={proveedor.idProveedor}> {proveedor.nombreProveedor}</option>
                                         )
                                     })}
-                                </select>
-                            </p>
+                                </Input>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 * costoProveedor:
-                                <input type="number"
+                                <Input type="number"
                                     name="costoProveedor"
                                     value={this.state.infoProducto.costoProveedor}
                                     onChange={this.onChange}
+                                    invalid={this.state.costoProveedorInvalid}
                                 />
-                            </p>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 * Aplica para el auto:
-                                <select
+                                <Input
+                                    type="select"
                                     name="idAuto"
                                     value={this.state.infoProducto.idAuto}
                                     onChange={this.onChange}
+                                    invalid={this.state.idAutoInvalid}
                                 >
                                     <option>Seleccione un auto</option>
                                     {this.state.autos.map((auto) => {
@@ -322,20 +393,23 @@ export default class catalogoProducto extends Component {
                                             <option key={auto.idAuto} value={auto.idAuto}> {auto.nombreMarca}, año: {auto.year} modelo: {auto.modelo}, motor: {auto.motor}</option>
                                         )
                                     })}
-                                </select>
-                            </p>
+                                </Input>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 * existencia:
-                                <input
+                                <Input
                                     type="number"
                                     name="existencia"
                                     value={this.state.infoProducto.existencia}
                                     onChange={this.onChange}
+                                    invalid={this.state.existenciaInvalid}
                                 />
-                            </p>
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
 
-                            <p>
+                            <FormGroup>
                                 <button
                                     type="submit"
                                 >
@@ -347,14 +421,15 @@ export default class catalogoProducto extends Component {
                                 >
                                     Cerrar
                                 </button>
-                            </p>
+                            </FormGroup>
                         </form>
                     </fieldset>
                 }
 
                 <fieldset>
                     <legend>Lista de productos</legend>
-                    <select
+                    <Input
+                        type="select"
                         name="idProveedor"
                         value={this.state.idProveedor}
                         onChange={this.onChangeProveedor}
@@ -365,12 +440,13 @@ export default class catalogoProducto extends Component {
                                 <option key={proveedor.idProveedor} value={proveedor.idProveedor}> {proveedor.nombreProveedor}</option>
                             )
                         })}
-                    </select>
+                    </Input>
 
                     {this.state.mostrarFiltroMarca &&
                         <>
                             filtro de marca:
-                            <select
+                            <Input
+                                type="select"
                                 name="idMarca"
                                 value={this.state.idMarca}
                                 onChange={this.onChangeMarca}
@@ -381,7 +457,7 @@ export default class catalogoProducto extends Component {
                                         <option key={marca.idMarca} value={marca.idMarca}> {marca.nombreMarca}</option>
                                     )
                                 })}
-                            </select>
+                            </Input>
                         </>
                     }
 

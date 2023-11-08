@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import axios from 'axios'
 import g from './global'
 import "./style.css"
-import { /* FormFeedback, */ Input, FormGroup, Form, Button } from 'reactstrap'
+import { FormFeedback, Input, FormGroup, Form, Button } from 'reactstrap'
 
 export default class catalogoAuto extends Component {
     constructor(props) {
@@ -150,7 +150,7 @@ export default class catalogoAuto extends Component {
                                         )
                                     })}
                                 </Input>
-                                {/* <FormFeedback>Este campo es requerido</FormFeedback> */}
+                                <FormFeedback>Este campo es requerido</FormFeedback>
                             </FormGroup>
 
                             <FormGroup>
@@ -169,7 +169,7 @@ export default class catalogoAuto extends Component {
                                         )
                                     })}
                                 </Input>
-                                {/* <FormFeedback>Este campo es requerido</FormFeedback> */}
+                                <FormFeedback>Este campo es requerido</FormFeedback>
                             </FormGroup>
 
                             <FormGroup>
@@ -180,7 +180,7 @@ export default class catalogoAuto extends Component {
                                     onChange={this.onChange}
                                     invalid={this.state.modeloInvalid}
                                 />
-                                {/* <FormFeedback>Este campo es requerido</FormFeedback> */}
+                                <FormFeedback>Este campo es requerido</FormFeedback>
                             </FormGroup>
 
                             <FormGroup>
@@ -192,7 +192,7 @@ export default class catalogoAuto extends Component {
                                     onChange={this.onChange}
                                     invalid={this.state.motorInvalid}
                                 />
-                                {/* <FormFeedback>Este campo es requerido</FormFeedback> */}
+                                <FormFeedback>Este campo es requerido</FormFeedback>
                             </FormGroup>
 
                             <p>
