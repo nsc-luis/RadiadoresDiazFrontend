@@ -21,23 +21,33 @@ export default class VentaRadiador extends Component {
     }
 
     listaYears = async () => {
-        await axios.get(`${g.url_api}/auto/listaYears`)
-            .then(res => {
-                this.setState({ listaYears: res.data })
-            })
+        try {
+            await axios.get(`${g.url_api}/auto/listaYears`)
+                .then(res => {
+                    this.setState({ listaYears: res.data })
+                })
+        }
+        catch (err) {
+            alert("Error:\n" + err)
+        }
     }
 
     marcaPorYear = async (year) => {
-        await axios.get(`${g.url_api}/marca/PorYear?year=${year}`)
-            .then(res => {
-                this.setState({
-                    marcas: res.data,
-                    idMarca: "0",
-                    idAuto: "0",
-                    autos: [],
-                    productos: []
+        try {
+            await axios.get(`${g.url_api}/marca/PorYear?year=${year}`)
+                .then(res => {
+                    this.setState({
+                        marcas: res.data,
+                        idMarca: "0",
+                        idAuto: "0",
+                        autos: [],
+                        productos: []
+                    })
                 })
-            })
+        }
+        catch (err) {
+            alert("Error:\n" + err)
+        }
     }
 
     autoPorMarca = async (idMarca) => {
@@ -45,14 +55,19 @@ export default class VentaRadiador extends Component {
             idMarca: idMarca,
             year: this.state.year
         }
-        await axios.post(`${g.url_api}/Auto/modeloPorMarcaYear`, yearMarca)
-            .then(res => {
-                this.setState({
-                    autos: res.data,
-                    idAuto: "0",
-                    productos: []
+        try {
+            await axios.post(`${g.url_api}/Auto/modeloPorMarcaYear`, yearMarca)
+                .then(res => {
+                    this.setState({
+                        autos: res.data,
+                        idAuto: "0",
+                        productos: []
+                    })
                 })
-            })
+        }
+        catch (err) {
+            alert("Error:\n" + err)
+        }
     }
 
     componentDidMount() {
@@ -82,10 +97,15 @@ export default class VentaRadiador extends Component {
             idMarca: this.state.idMarca,
             idAuto: this.state.idAuto
         }
-        await axios.post(`${g.url_api}/Producto/FiltroMarcaAuto`, fMarcaAuto)
-            .then(res => {
-                this.setState({ productos: res.data })
-            })
+        try {
+            await axios.post(`${g.url_api}/Producto/FiltroMarcaAuto`, fMarcaAuto)
+                .then(res => {
+                    this.setState({ productos: res.data })
+                })
+        }
+        catch (err) {
+            alert("Error:\n" + err)
+        }
     }
 
     render() {
@@ -168,30 +188,30 @@ export default class VentaRadiador extends Component {
                             <tbody>
                                 {this.state.productos.map((producto) => {
                                     return (
-                                            <tr key={producto.idProducto}>
-                                                <td>{producto.nombreMarca} <br />
-                                                    modelo: {producto.modelo} <br />
-                                                    año: {producto.year} <br />
-                                                    motor: {producto.motor} </td>
-                                                <td>
-                                                    proveedor: {producto.nombreProveedor} <br />
-                                                    {producto.nombreProducto} <br />
-                                                    # de parte: {producto.noParte} <br />
-                                                    material: {producto.material} </td>
-                                                <td>precioNuevoInstalado: {producto.precioNuevoInstalado} <br />
-                                                    precioNuevoSuelto: {producto.precioNuevoSuelto} <br />
-                                                    precioReparadoInstalado: {producto.precioReparadoInstalado} <br />
-                                                    precioReparadoSuelto: {producto.precioReparadoSuelto} </td>
-                                                <td>{producto.observaciones}</td>
-                                                <td>{producto.existencia}</td>
-                                                <td>
-                                                    <img src={radiador} alt='Imagen de muestra' />
-                                                </td>
-                                                <td>
-                                                    <button>Ver PDF</button><br />
-                                                    <button>Enviar email</button>
-                                                </td>
-                                            </tr>
+                                        <tr key={producto.idProducto}>
+                                            <td>{producto.nombreMarca} <br />
+                                                modelo: {producto.modelo} <br />
+                                                año: {producto.year} <br />
+                                                motor: {producto.motor} </td>
+                                            <td>
+                                                proveedor: {producto.nombreProveedor} <br />
+                                                {producto.nombreProducto} <br />
+                                                # de parte: {producto.noParte} <br />
+                                                material: {producto.material} </td>
+                                            <td>precioNuevoInstalado: {producto.precioNuevoInstalado} <br />
+                                                precioNuevoSuelto: {producto.precioNuevoSuelto} <br />
+                                                precioReparadoInstalado: {producto.precioReparadoInstalado} <br />
+                                                precioReparadoSuelto: {producto.precioReparadoSuelto} </td>
+                                            <td>{producto.observaciones}</td>
+                                            <td>{producto.existencia}</td>
+                                            <td>
+                                                <img src={radiador} alt='Imagen de muestra' />
+                                            </td>
+                                            <td>
+                                                <button>Ver PDF</button><br />
+                                                <button>Enviar email</button>
+                                            </td>
+                                        </tr>
                                     )
                                 })}
                             </tbody>

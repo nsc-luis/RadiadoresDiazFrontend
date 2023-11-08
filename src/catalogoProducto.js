@@ -26,6 +26,7 @@ export default class catalogoProducto extends Component {
             infoProducto: {
                 ...this.state.infoProducto,
                 idProveedor: "0",
+                idAuto: "0",
                 idTipoProducto: "1",
                 nombreProducto: "",
                 precioNuevoSuelto: "0.00",
@@ -42,35 +43,50 @@ export default class catalogoProducto extends Component {
     }
 
     listaAutos = async () => {
-        await axios.get(`${g.url_api}/auto`)
-            .then(res => {
-                this.setState({ autos: res.data })
-            })
+        try {
+            await axios.get(`${g.url_api}/auto`)
+                .then(res => {
+                    this.setState({ autos: res.data })
+                })
+        }
+        catch (err) {
+            alert("Error:\n" + err)
+        }
     }
 
     listaProveedores = async () => {
-        await axios.get(`${g.url_api}/proveedor`)
-            .then(res => {
-                this.setState({ proveedores: res.data })
-            })
+        try {
+            await axios.get(`${g.url_api}/proveedor`)
+                .then(res => {
+                    this.setState({ proveedores: res.data })
+                })
+        }
+        catch (err) {
+            alert("Error:\n" + err)
+        }
     }
 
     listaProductos = async (idProveedor) => {
-        await axios.get(`${g.url_api}/producto/PorProveedor?idProveedor=${idProveedor}`)
-            .then(res => {
-                var marcasTemp = res.data
-                var hash = {}
-                /* marcasTemp = marcasTemp.filter(function(marca){
-                    var noRepetidos = !hash[marca.idMarca]
-                    hash[marca.idMarca] = true
-                    return noRepetidos
-                }) */
-                marcasTemp = marcasTemp.filter(o => hash[o.idMarca] ? false : hash[o.idMarca] = true)
-                this.setState({
-                    productos: res.data,
-                    marcas: marcasTemp
+        try {
+            await axios.get(`${g.url_api}/producto/PorProveedor?idProveedor=${idProveedor}`)
+                .then(res => {
+                    var marcasTemp = res.data
+                    var hash = {}
+                    /* marcasTemp = marcasTemp.filter(function(marca){
+                        var noRepetidos = !hash[marca.idMarca]
+                        hash[marca.idMarca] = true
+                        return noRepetidos
+                    }) */
+                    marcasTemp = marcasTemp.filter(o => hash[o.idMarca] ? false : hash[o.idMarca] = true)
+                    this.setState({
+                        productos: res.data,
+                        marcas: marcasTemp
+                    })
                 })
-            })
+        }
+        catch (err) {
+            alert("Error:\n" + err)
+        }
     }
 
     onChange = (e) => {
@@ -111,11 +127,12 @@ export default class catalogoProducto extends Component {
     }
 
     mostrarFormularioProducto = () => {
-        this.setState({ 
+        this.setState({
             formularioProducto: !this.state.formularioProducto,
             infoProducto: {
                 ...this.state.infoProducto,
                 idProveedor: "0",
+                idAuto: "0",
                 idTipoProducto: "1",
                 nombreProducto: "",
                 precioNuevoSuelto: "0.00",
@@ -124,7 +141,7 @@ export default class catalogoProducto extends Component {
                 precioReparadoInstalado: "0.00",
                 noParte: "",
                 observaciones: "",
-                costoProveedor: "",
+                costoProveedor: "0.00",
                 existencia: ""
             }
         })
@@ -132,11 +149,29 @@ export default class catalogoProducto extends Component {
 
     guardarInfo = async (e) => {
         e.preventDefault()
-        await axios.post(`${g.url_api}/producto`, this.state.infoProducto)
-            .then(res => {
-                alert("Ok!\nAlta de producto satisfactoria.")
-                console.log(res.data)
-            })
+        if (
+            this.state.infoProducto.idProveedor === "0"
+            || this.state.infoProducto.nombreProducto === ""
+            || !Number(this.state.infoProducto.precioNuevoSuelto)
+            || !Number(this.state.infoProducto.precioNuevoInstalado)
+            || !Number(this.state.infoProducto.precioReparadoSuelto)
+            || !Number(this.state.infoProducto.precioReparadoInstalado)
+            || !Number(this.state.infoProducto.costoProveedor)
+            || !Number(this.state.infoProducto.existencia)
+            || this.state.infoProducto.noParte === ""
+        ) {
+            alert("Error:\nLos campos marcados con * son requeridos.")
+        }
+            try {
+                await axios.post(`${g.url_api}/producto`, this.state.infoProducto)
+                    .then(res => {
+                        alert("Ok!\nAlta de producto satisfactoria.")
+                        console.log(res.data)
+                    })
+            }
+            catch (err) {
+                alert("Error:\n" + err)
+            }
         this.mostrarFormularioProducto()
     }
 
@@ -159,7 +194,7 @@ export default class catalogoProducto extends Component {
                         <legend>Formulario de alta/edicion de producto</legend>
                         <form onSubmit={this.guardarInfo}>
                             <p>
-                                tipoProducto:
+                                * tipoProducto:
                                 <select
                                     name="idTipoProducto"
                                     value={this.state.infoProducto.idTipoProducto}
@@ -173,7 +208,7 @@ export default class catalogoProducto extends Component {
                                 </select>
                             </p>
                             <p>
-                                nombreProducto:
+                                * nombreProducto:
                                 <input
                                     type="text"
                                     name="nombreProducto"
@@ -183,7 +218,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                precioNuevoSuelto:
+                                * precioNuevoSuelto:
                                 <input
                                     type="number"
                                     name="precioNuevoSuelto"
@@ -193,7 +228,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                precioNuevoInstalado:
+                                * precioNuevoInstalado:
                                 <input
                                     type="number"
                                     name="precioNuevoInstalado"
@@ -203,7 +238,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                precioReparadoSuelto:
+                                * precioReparadoSuelto:
                                 <input
                                     type="number"
                                     name="precioReparadoSuelto"
@@ -213,7 +248,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                precioReparadoInstalado:
+                                * precioReparadoInstalado:
                                 <input
                                     type="number"
                                     name="precioReparadoInstalado"
@@ -223,7 +258,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                noParte: <input
+                                * noParte: <input
                                     type="text"
                                     name="noParte"
                                     value={this.state.infoProducto.noParte}
@@ -232,7 +267,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                material: <input
+                                * material: <input
                                     type="text"
                                     name="material"
                                     value={this.state.infoProducto.material}
@@ -241,7 +276,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                observaciones:<br />
+                                * observaciones:<br />
                                 <textarea
                                     name="observaciones"
                                     value={this.state.infoProducto.observaciones}
@@ -250,7 +285,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                Proveedor:
+                                * Proveedor:
                                 <select
                                     name="idProveedor"
                                     value={this.state.infoProducto.idProveedor}
@@ -266,7 +301,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                costoProveedor:
+                                * costoProveedor:
                                 <input type="number"
                                     name="costoProveedor"
                                     value={this.state.infoProducto.costoProveedor}
@@ -275,7 +310,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                Aplica para el auto:
+                                * Aplica para el auto:
                                 <select
                                     name="idAuto"
                                     value={this.state.infoProducto.idAuto}
@@ -291,7 +326,7 @@ export default class catalogoProducto extends Component {
                             </p>
 
                             <p>
-                                existencia:
+                                * existencia:
                                 <input
                                     type="number"
                                     name="existencia"

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import axios from 'axios'
 import g from './global'
 import "./style.css"
+import { /* FormFeedback, */ Input, FormGroup, Form, Button } from 'reactstrap'
 
 export default class catalogoAuto extends Component {
     constructor(props) {
@@ -14,7 +15,11 @@ export default class catalogoAuto extends Component {
             year: "0",
             motor: "0.0",
             autos: [],
-            formularioAuto: false
+            formularioAuto: false,
+            idMarcaInvalid: false,
+            modeloInvalid: false,
+            yearInvalid: false,
+            motorInvalid: false
         }
     }
 
@@ -29,21 +34,31 @@ export default class catalogoAuto extends Component {
     }
 
     listaMarcas = async () => {
-        await axios.get(`${g.url_api}/marca`)
-            .then(res => {
-                this.setState({
-                    marcas: res.data
+        try {
+            await axios.get(`${g.url_api}/marca`)
+                .then(res => {
+                    this.setState({
+                        marcas: res.data
+                    })
                 })
-            })
+        }
+        catch (err) {
+            alert("Error:\n" + err.message)
+        }
     }
 
     listaAutos = async (idMarca) => {
-        await axios.get(`${g.url_api}/Auto/PorMarca?idMarca=${idMarca}`)
-            .then(res => {
-                this.setState({
-                    autos: res.data
+        try {
+            await axios.get(`${g.url_api}/Auto/PorMarca?idMarca=${idMarca}`)
+                .then(res => {
+                    this.setState({
+                        autos: res.data
+                    })
                 })
-            })
+        }
+        catch (err) {
+            alert("Error:\n" + err.message)
+        }
     }
 
     changeMarca = (e) => {
@@ -74,17 +89,35 @@ export default class catalogoAuto extends Component {
 
     guardarInfo = async (e) => {
         e.preventDefault()
+        this.setState({
+            yearInvalid: this.state.year === "0" ? true : false,
+            idMarcaInvalid: this.state.idMarca === "0" ? true : false,
+            modeloInvalid: this.state.modelo === "" ? true : false,
+            motorInvalid: this.state.motor === "" ? true : false,
+        })
+        if (this.state.idMarca === "0"
+            || this.state.motor === ""
+            || this.state.modelo === ""
+            || this.state.year === "0") {
+            alert("Error:\nLos campos marcados con * son requeridos.")
+            return false
+        }
         var altaAuto = {
             idMarca: this.state.idMarca,
             motor: this.state.motor,
             modelo: this.state.modelo,
             year: this.state.year
         }
-        await axios.post(`${g.url_api}/Auto`, altaAuto)
-            .then(res => {
-                alert("Ok!\nAlta satisfactoria.")
-                console.log(res.data)
-            })
+        try {
+            await axios.post(`${g.url_api}/Auto`, altaAuto)
+                .then(res => {
+                    alert("Ok!\nAlta satisfactoria.")
+                    console.log(res.data)
+                })
+        }
+        catch (err) {
+            alert("Error:\n" + err.message)
+        }
         this.mostrarFormularioAuto()
     }
 
@@ -100,13 +133,15 @@ export default class catalogoAuto extends Component {
                 {this.state.formularioAuto &&
                     <fieldset>
                         <legend>Formulario de alta/edicion de auto</legend>
-                        <form onSubmit={this.guardarInfo}>
-                            <p>
-                                Año:
-                                <select
+                        <Form onSubmit={this.guardarInfo}>
+                            <FormGroup>
+                                * Año:
+                                <Input
+                                    type="select"
                                     name="year"
                                     value={this.state.year}
                                     onChange={this.onChange}
+                                    invalid={this.state.yearInvalid}
                                 >
                                     <option value="0">Selecciona un año</option>
                                     {this.state.years.map((year) => {
@@ -114,15 +149,18 @@ export default class catalogoAuto extends Component {
                                             <option key={year} value={year}>{year}</option>
                                         )
                                     })}
-                                </select>
-                            </p>
+                                </Input>
+                                {/* <FormFeedback>Este campo es requerido</FormFeedback> */}
+                            </FormGroup>
 
-                            <p>
-                                Marca:
-                                <select
+                            <FormGroup>
+                                * Marca: 
+                                <Input
+                                    type="select"
                                     name="idMarca"
                                     value={this.state.idMarca}
                                     onChange={this.onChange}
+                                    invalid={this.state.idMarcaInvalid}
                                 >
                                     <option value="0">Selecciona una marca</option>
                                     {this.state.marcas.map((marca) => {
@@ -130,40 +168,45 @@ export default class catalogoAuto extends Component {
                                             <option key={marca.idMarca} value={marca.idMarca}>{marca.nombreMarca}</option>
                                         )
                                     })}
-                                </select>
-                            </p>
+                                </Input>
+                                {/* <FormFeedback>Este campo es requerido</FormFeedback> */}
+                            </FormGroup>
 
-                            <p>
-                                Modelo:
-                                <input
+                            <FormGroup>
+                                * Modelo:
+                                <Input
                                     type="text" name="modelo"
                                     value={this.state.modelo}
                                     onChange={this.onChange}
+                                    invalid={this.state.modeloInvalid}
                                 />
-                            </p>
+                                {/* <FormFeedback>Este campo es requerido</FormFeedback> */}
+                            </FormGroup>
 
-                            <p>
-                                Motor:
-                                <input
+                            <FormGroup>
+                                * Motor:
+                                <Input
                                     type="text"
                                     name="motor"
                                     value={this.state.motor}
                                     onChange={this.onChange}
+                                    invalid={this.state.motorInvalid}
                                 />
-                            </p>
+                                {/* <FormFeedback>Este campo es requerido</FormFeedback> */}
+                            </FormGroup>
 
                             <p>
-                                <button type="submit">
+                                <Button type="submit">
                                     Guardar
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
                                     onClick={this.mostrarFormularioAuto}
                                 >
                                     Cerrar
-                                </button>
+                                </Button>
                             </p>
-                        </form>
+                        </Form>
                     </fieldset >
                 }
 
