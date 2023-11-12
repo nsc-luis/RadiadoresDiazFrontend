@@ -1,6 +1,12 @@
 body {
     font-size: medium;
 }
-table th, td{
+
+table th,
+td {
     border: 1px solid black;
+}
+
+.inputBGC {
+    background-color:lightgreen
 }

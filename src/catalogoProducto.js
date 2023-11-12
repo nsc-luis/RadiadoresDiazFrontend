@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import g from './global'
-import "./style.css"
+import styles from './style.css'
 import { FormFeedback, Input, FormGroup, Form, Button } from 'reactstrap'
 
 export default class catalogoProducto extends Component {
@@ -34,6 +34,7 @@ export default class catalogoProducto extends Component {
     componentDidMount() {
         this.listaAutos()
         this.listaProveedores()
+        this.listaMarcas()
         this.setState({
             infoProducto: {
                 ...this.state.infoProducto,
@@ -63,6 +64,20 @@ export default class catalogoProducto extends Component {
         }
         catch (err) {
             alert("Error:\n" + err)
+        }
+    }
+
+    listaMarcas = async () => {
+        try {
+            await axios.get(`${g.url_api}/marca`)
+                .then(res => {
+                    this.setState({
+                        marcas: res.data
+                    })
+                })
+        }
+        catch (err) {
+            alert("Error:\n" + err.message)
         }
     }
 
@@ -234,15 +249,13 @@ export default class catalogoProducto extends Component {
                 {this.state.formularioProducto &&
                     <fieldset>
                         <legend>Formulario de alta/edicion de producto</legend>
-                        <form onSubmit={this.guardarInfo}>
+                        <Form onSubmit={this.guardarInfo}>
                             <FormGroup>
                                 * tipoProducto:
                                 <Input
-                                    type="select"
+                                    type='select'
                                     name="idTipoProducto"
                                     value={this.state.infoProducto.idTipoProducto}
-                                    onChange={this.onChange}
-                                    invalid={this.state.idTipoProductoInvalid}
                                 >
                                     <option value="0">Selecciona el tipo de producto</option>
                                     <option value="1">Radiador</option>
@@ -410,19 +423,19 @@ export default class catalogoProducto extends Component {
                             </FormGroup>
 
                             <FormGroup>
-                                <button
+                                <Button
                                     type="submit"
                                 >
                                     Guardar
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
                                     onClick={this.mostrarFormularioProducto}
                                 >
                                     Cerrar
-                                </button>
+                                </Button>
                             </FormGroup>
-                        </form>
+                        </Form>
                     </fieldset>
                 }
 
@@ -475,9 +488,10 @@ export default class catalogoProducto extends Component {
                             </thead>
                             <tbody>
                                 {this.state.productos.map((producto) => {
+                                    var idKey = producto.idProducto + "|" + producto.idProveedor
                                     return (
                                         <>
-                                            <tr key={producto.idProducto}>
+                                            <tr key={idKey}>
                                                 <td>{producto.nombreProveedor}</td>
                                                 <td>
                                                     {producto.nombreProducto} <br />

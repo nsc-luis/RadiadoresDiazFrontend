@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import g from './global'
-import "./style.css"
+import './style.css'
 import radiador from './images/radiador.png'
 
 export default class VentaRadiador extends Component {

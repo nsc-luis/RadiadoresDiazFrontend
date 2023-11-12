@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import g from './global'
-import "./style.css"
+import './style.css'
 import { FormFeedback, Input, FormGroup, Form, Button } from 'reactstrap'
 
 export default class catalogoAuto extends Component {
