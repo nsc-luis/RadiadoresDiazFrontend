@@ -392,6 +392,18 @@ export default class catalogoProducto extends Component {
                             </FormGroup>
 
                             <FormGroup>
+                                * existencia:
+                                <Input
+                                    type="number"
+                                    name="existencia"
+                                    value={this.state.infoProducto.existencia}
+                                    onChange={this.onChange}
+                                    invalid={this.state.existenciaInvalid}
+                                />
+                                <FormFeedback>Este campo es requerido</FormFeedback>
+                            </FormGroup>
+
+                            <FormGroup>
                                 * Aplica para el auto:
                                 <Input
                                     type="select"
@@ -407,18 +419,6 @@ export default class catalogoProducto extends Component {
                                         )
                                     })}
                                 </Input>
-                                <FormFeedback>Este campo es requerido</FormFeedback>
-                            </FormGroup>
-
-                            <FormGroup>
-                                * existencia:
-                                <Input
-                                    type="number"
-                                    name="existencia"
-                                    value={this.state.infoProducto.existencia}
-                                    onChange={this.onChange}
-                                    invalid={this.state.existenciaInvalid}
-                                />
                                 <FormFeedback>Este campo es requerido</FormFeedback>
                             </FormGroup>
 

@@ -16,7 +16,9 @@ export default class VentaRadiador extends Component {
             idAuto: "0",
             idProveedor: "0",
             proveedores: [],
-            productos: []
+            productos: [],
+            habilitaFiltroNoParte: false,
+            noParte: ""
         }
     }
 
@@ -85,26 +87,54 @@ export default class VentaRadiador extends Component {
         if (e.target.name === "idMarca") {
             this.autoPorMarca(e.target.value)
         }
+        if (e.target.name === "habilitaFiltroNoParte") {
+            this.setState({ habilitaFiltroNoParte: e.target.checked })
+            if (!e.target.checked) this.setState({ noParte: "" })
+        }
     }
 
-    buscarProducto = async () => {
-        if (this.state.idMarca === "0" || this.state.year === "0") {
-            alert("Error:\nDebe seleccionar al menos el año y la marca del auto.")
-            return false
+    buscarProducto = async (e) => {
+        e.preventDefault()
+
+        if (this.state.habilitaFiltroNoParte) {
+            if (this.state.noParte !== "") {
+                try {
+                    await axios.get(`${g.url_api}/Producto/PorNoParte?noParte=${this.state.noParte}`)
+                        .then(res => {
+                            this.setState({ productos: res.data })
+                        })
+                }
+                catch (err) {
+                    alert("Error:\n" + err)
+                }
+            }
+            else {
+                alert("Error:\nSi habilita la busqueda por # de parte (DPI) debe proporcionar un codigo de producto.")
+                return false
+            }
         }
-        let fMarcaAuto = {
-            year: this.state.year,
-            idMarca: this.state.idMarca,
-            idAuto: this.state.idAuto
-        }
-        try {
-            await axios.post(`${g.url_api}/Producto/FiltroMarcaAuto`, fMarcaAuto)
-                .then(res => {
-                    this.setState({ productos: res.data })
-                })
-        }
-        catch (err) {
-            alert("Error:\n" + err)
+
+        if (!this.state.habilitaFiltroNoParte) {
+            if (this.state.idMarca !== "0") {
+                let fMarcaAuto = {
+                    year: this.state.year,
+                    idMarca: this.state.idMarca,
+                    idAuto: this.state.idAuto
+                }
+                try {
+                    await axios.post(`${g.url_api}/Producto/FiltroMarcaAuto`, fMarcaAuto)
+                        .then(res => {
+                            this.setState({ productos: res.data })
+                        })
+                }
+                catch (err) {
+                    alert("Error:\n" + err)
+                }
+            }
+            else {
+                alert("Error:\nDebe seleccionar al menos la marca del auto.")
+                return false
+            }
         }
     }
 
@@ -157,6 +187,25 @@ export default class VentaRadiador extends Component {
                                 )
                             })}
                         </select>
+                    </p>
+
+                    <p>
+                        <input
+                            type="checkbox"
+                            name="habilitaFiltroNoParte"
+                            value={this.state.habilitaFiltroNoParte}
+                            onChange={this.onChange}
+                            className='chkBox'
+                        />
+                        # de parte (DPI):
+                        {this.state.habilitaFiltroNoParte &&
+                            <input
+                                type="text"
+                                name="noParte"
+                                value={this.state.noParte}
+                                onChange={this.onChange}
+                            />
+                        }
                     </p>
 
                     <p>
